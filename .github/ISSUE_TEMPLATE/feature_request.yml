@@ -1,0 +1,161 @@
+name: ✨ Feature Request  
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement", "needs-discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Please provide detailed information to help us understand and evaluate your request.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: I have read the CONTRIBUTING.md guide
+          required: true
+        - label: This is a feature request, not a bug report
+          required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What type of feature is this?
+      options:
+        - Gmail Integration (email processing, filtering, etc.)
+        - AI Chat Features (new conversation types, AI models)
+        - User Interface (web interface improvements)
+        - Security & Authentication (OAuth, permissions)
+        - Performance & Optimization
+        - Developer Experience (DevContainer, testing, docs)
+        - API & Integrations (new external services)
+        - Configuration & Setup
+        - Other (specify in description)
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: "What problem does this feature solve? What use case does it address?"
+      placeholder: |
+        As a [user type], I want to [goal] so that [benefit].
+        
+        Currently, when I try to [current process], I have to [workaround/limitation]...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: "Describe your ideal solution to the problem"
+      placeholder: |
+        I would like the application to...
+        
+        The feature would work by...
+        
+        The user experience would be...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions
+      description: "Other approaches you've considered"
+      placeholder: |
+        Alternative 1: ...
+        Alternative 2: ...
+        
+        Why the proposed solution is better: ...
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples & Use Cases
+      description: "Specific examples of how this feature would be used"
+      placeholder: |
+        Example 1: When processing emails from [scenario], the feature would...
+        Example 2: During AI chat about [topic], users could...
+        Example 3: For Gmail accounts with [configuration], this would enable...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this feature to you?
+      options:
+        - Critical (Blocking major use case, many users affected)
+        - High (Important for productivity, significant user benefit)
+        - Medium (Nice to have, moderate user benefit)
+        - Low (Minor improvement, small user benefit)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Estimated Complexity
+      description: How complex do you think this feature would be to implement?
+      options:
+        - Low (Small changes, existing patterns)
+        - Medium (Moderate changes, some new components)
+        - High (Significant changes, new architecture)
+        - Very High (Major refactoring, external dependencies)
+        - Unknown (Not sure about implementation complexity)
+
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Potential Impact Areas
+      description: Which parts of the application might be affected?
+      options:
+        - label: Gmail OAuth scopes (may require additional permissions)
+        - label: Email processing logic
+        - label: AI model integration (Ollama)
+        - label: Database/session storage
+        - label: User interface
+        - label: Security model
+        - label: Performance characteristics
+        - label: Testing framework
+        - label: Documentation
+        - label: DevContainer setup
+
+  - type: textarea
+    id: technical-details
+    attributes:
+      label: Technical Considerations (Optional)
+      description: "Any technical details, API requirements, or implementation thoughts"
+      placeholder: |
+        - Gmail API requirements: ...
+        - Ollama model considerations: ...
+        - Security implications: ...
+        - Performance considerations: ...
+        - Testing strategy: ...
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution Intent
+      options:
+        - label: I would be interested in implementing this feature myself
+        - label: I would be willing to help test this feature
+        - label: I would like to provide feedback during development
+        - label: I can provide domain expertise for this feature
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: "Any other context, screenshots, mockups, or references"
+      placeholder: |
+        - Similar features in other applications: ...
+        - Related research or articles: ...
+        - Screenshots or mockups: ...
+        - Timeline considerations: ...
