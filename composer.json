@@ -32,7 +32,7 @@
         "test:cov": "XDEBUG_MODE=coverage phpunit --coverage-text",
         "test:mut": "vendor/bin/infection --threads=$(nproc) --min-msi=70 --min-covered-msi=70",
         "test:ci": "phpunit --coverage-clover build/coverage.xml && phpcov --min-lines=75 --min-branches=70 build/coverage.xml",
-        "cs:check": "vendor/bin/php-cs-fixer check --diff --dry-run",
+        "cs:check": "vendor/bin/php-cs-fixer check --diff",
         "cs:fix": "vendor/bin/php-cs-fixer fix",
         "stan": "vendor/bin/phpstan analyse"
     },

@@ -16,6 +16,4 @@ parameters:
         - '#has no return type specified#'
         # Ignore missing type hints in test files
         - '#Method Tests\\.*::.* has no return type specified#'
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
     treatPhpDocTypesAsCertain: false 
