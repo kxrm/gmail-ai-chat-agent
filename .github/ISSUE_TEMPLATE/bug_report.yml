@@ -1,0 +1,157 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please provide as much detail as possible to help us reproduce and fix the issue.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: I have read the CONTRIBUTING.md guide
+          required: true
+        - label: I can reproduce this issue consistently
+          required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: How are you running the application?
+      options:
+        - DevContainer (VS Code Remote-Containers)
+        - Local PHP installation
+        - Docker (custom setup)
+        - Other (specify in description)
+    validations:
+      required: true
+
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP Version
+      description: "Output of `php --version`"
+      placeholder: "PHP 8.2.28 (cli) ..."
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: "Your OS and version"
+      placeholder: "Ubuntu 22.04, macOS 14.0, Windows 11, etc."
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: "Clear and concise description of what the bug is"
+      placeholder: "When I try to..., the application..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: "Exact steps to reproduce the behavior"
+      placeholder: |
+        1. Set up OAuth with '...'
+        2. Send email request with '...'
+        3. Click on '...'
+        4. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: "What you expected to happen"
+      placeholder: "The application should..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: "What actually happened"
+      placeholder: "Instead, the application..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs
+      description: "Relevant error messages or logs"
+      placeholder: |
+        Please include:
+        - Browser console errors (if web interface)
+        - PHP error logs (storage/logs/chat_app.log)
+        - Composer/dependency errors
+        - OAuth callback errors
+      render: text
+
+  - type: textarea
+    id: oauth-config
+    attributes:
+      label: OAuth Configuration (if relevant)
+      description: "OAuth setup details (DO NOT include real credentials)"
+      placeholder: |
+        - Google Cloud Project setup: Yes/No
+        - OAuth redirect URI configured: Yes/No
+        - Scopes requested: Gmail.readonly, etc.
+        - Error during OAuth flow: Yes/No
+      render: text
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How severe is this issue?
+      options:
+        - Critical (Application unusable, data loss, security issue)
+        - High (Major feature broken, workaround difficult)
+        - Medium (Feature partially broken, workaround available)
+        - Low (Minor issue, cosmetic, or enhancement)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: components
+    attributes:
+      label: Affected Components
+      description: Which parts of the application are affected?
+      options:
+        - label: Gmail OAuth authentication
+        - label: Email fetching/processing
+        - label: AI chat integration (Ollama)
+        - label: Session management
+        - label: Web interface
+        - label: DevContainer setup
+        - label: Testing framework
+        - label: Documentation
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: "Any other context about the problem"
+      placeholder: |
+        - First time setting up or existing installation?
+        - Recent changes to configuration?
+        - Works in some cases but not others?
+        - Related to specific Gmail account types?
+        - Timing of when issue started?
