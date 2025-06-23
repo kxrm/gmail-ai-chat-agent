@@ -1,0 +1,92 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    # Check for updates weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  update-dependencies:
+    name: Update Composer Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        tools: composer:v2
+    
+    - name: Cache Composer dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.composer/cache
+        key: php-8.2-composer-${{ hashFiles('**/composer.lock') }}
+    
+    - name: Install current dependencies
+      run: composer install --no-progress --no-interaction
+    
+    - name: Run current tests to ensure baseline
+      run: |
+        mkdir -p storage/logs storage/sessions storage/sessions/temp_sessions
+        vendor/bin/phpunit tests/unit/ tests/integration/ --stop-on-failure
+    
+    - name: Update dependencies
+      run: |
+        # Update dependencies while respecting version constraints
+        composer update --with-dependencies --no-progress --no-interaction
+        
+        # Check if anything actually changed
+        if git diff --quiet composer.lock; then
+          echo "No dependency updates available"
+          echo "updates_available=false" >> $GITHUB_ENV
+        else
+          echo "updates_available=true" >> $GITHUB_ENV
+          echo "Dependency updates found"
+        fi
+    
+    - name: Run tests with updated dependencies
+      if: env.updates_available == 'true'
+      run: vendor/bin/phpunit tests/unit/ tests/integration/ --stop-on-failure
+    
+    - name: Run security audit on updated dependencies
+      if: env.updates_available == 'true'
+      run: composer audit --format=json
+    
+    - name: Generate update summary
+      if: env.updates_available == 'true'
+      run: |
+        echo "## Dependency Updates" > update_summary.md
+        echo "" >> update_summary.md
+        echo "The following dependencies were updated:" >> update_summary.md
+        echo "" >> update_summary.md
+        echo '```' >> update_summary.md
+        git diff composer.lock | grep -E "^\+|^\-" | head -20 >> update_summary.md
+        echo '```' >> update_summary.md
+        echo "" >> update_summary.md
+        echo "### Test Results" >> update_summary.md
+        echo "✅ All tests passed with updated dependencies" >> update_summary.md
+        echo "" >> update_summary.md
+        echo "### Security Audit" >> update_summary.md
+        echo "✅ No known vulnerabilities detected" >> update_summary.md
+    
+    - name: Create Pull Request
+      if: env.updates_available == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "chore: update Composer dependencies"
+        title: "🔄 Automated Dependency Updates"
+        body-path: update_summary.md
+        branch: dependency-updates/automated
+        delete-branch: true
+        labels: |
+          dependencies
+          automated
+        reviewers: kxrm 

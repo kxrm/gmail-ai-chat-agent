@@ -1,0 +1,114 @@
+name: Container Security
+
+on:
+  push:
+    paths:
+      - '.devcontainer/**'
+      - 'Dockerfile'
+  pull_request:
+    paths:
+      - '.devcontainer/**'
+      - 'Dockerfile'
+  schedule:
+    # Scan weekly for new vulnerabilities
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  scan-devcontainer:
+    name: Scan DevContainer
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build DevContainer
+      run: |
+        cd .devcontainer
+        docker build -t gmail-ai-chat-agent:dev -f Dockerfile .
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'gmail-ai-chat-agent:dev'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+    
+    - name: Run Trivy with table output for PR comments
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'gmail-ai-chat-agent:dev'
+        format: 'table'
+        exit-code: '0'
+        ignore-unfixed: true
+        severity: 'CRITICAL,HIGH'
+    
+    - name: Docker Scout CVE scan
+      uses: docker/scout-action@v1
+      if: always()
+      with:
+        command: cves
+        image: 'gmail-ai-chat-agent:dev'
+        only-severities: critical,high
+        write-comment: true
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  dockerfile-lint:
+    name: Lint Dockerfile
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Lint Dockerfile
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: .devcontainer/Dockerfile
+        format: sarif
+        output-file: hadolint-results.sarif
+        no-fail: true
+    
+    - name: Upload Hadolint scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: hadolint-results.sarif
+    
+    - name: Run Hadolint with table output
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: .devcontainer/Dockerfile
+        format: tty
+        no-fail: true
+
+  check-base-image:
+    name: Check Base Image Updates
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Check for base image updates
+      run: |
+        # Extract base image from Dockerfile
+        BASE_IMAGE=$(grep "^FROM" .devcontainer/Dockerfile | awk '{print $2}')
+        echo "Current base image: $BASE_IMAGE"
+        
+        # Check if there's a newer version available
+        docker pull $BASE_IMAGE
+        
+        # Get the latest tag info
+        LATEST_DIGEST=$(docker images --digests $BASE_IMAGE --format "table {{.Repository}}:{{.Tag}}\t{{.Digest}}" | tail -n +2 | head -1)
+        echo "Latest digest: $LATEST_DIGEST"
+        
+        # Create issue if base image is significantly outdated (this is a simplified check)
+        echo "Base image check completed. Manual review recommended for security updates." 

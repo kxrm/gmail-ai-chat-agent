@@ -1,0 +1,193 @@
+name: Issue & PR Management
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, edited, synchronize]
+  schedule:
+    # Clean up stale issues weekly
+    - cron: '0 12 * * 0'
+
+jobs:
+  label-issues:
+    name: Auto-label Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    
+    steps:
+    - name: Label bug reports
+      if: contains(github.event.issue.title, 'bug') || contains(github.event.issue.body, 'bug')
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.addLabels({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: ['bug', 'needs-triage']
+          });
+    
+    - name: Label feature requests
+      if: contains(github.event.issue.title, 'feature') || contains(github.event.issue.body, 'feature')
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.addLabels({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: ['enhancement', 'needs-discussion']
+          });
+    
+    - name: Label documentation issues
+      if: contains(github.event.issue.title, 'doc') || contains(github.event.issue.body, 'documentation')
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.addLabels({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: ['documentation']
+          });
+    
+    - name: Label security issues
+      if: contains(github.event.issue.title, 'security') || contains(github.event.issue.body, 'security')
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.addLabels({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            labels: ['security', 'priority-high']
+          });
+
+  label-prs:
+    name: Auto-label Pull Requests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Label based on changed files
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { data: files } = await github.rest.pulls.listFiles({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number,
+          });
+          
+          const labels = [];
+          
+          // Check file patterns
+          const hasTests = files.some(file => file.filename.includes('test'));
+          const hasDocs = files.some(file => file.filename.includes('README') || file.filename.includes('.md'));
+          const hasConfig = files.some(file => file.filename.includes('config') || file.filename.includes('.json'));
+          const hasCore = files.some(file => file.filename.includes('core/'));
+          const hasDevContainer = files.some(file => file.filename.includes('.devcontainer'));
+          const hasGitHub = files.some(file => file.filename.includes('.github'));
+          
+          if (hasTests) labels.push('tests');
+          if (hasDocs) labels.push('documentation');
+          if (hasConfig) labels.push('configuration');
+          if (hasCore) labels.push('core');
+          if (hasDevContainer) labels.push('devcontainer');
+          if (hasGitHub) labels.push('github-actions');
+          
+          // Size labels based on lines changed
+          const totalChanges = files.reduce((sum, file) => sum + file.changes, 0);
+          if (totalChanges < 10) labels.push('size/small');
+          else if (totalChanges < 100) labels.push('size/medium');
+          else labels.push('size/large');
+          
+          if (labels.length > 0) {
+            await github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: labels
+            });
+          }
+
+  stale-management:
+    name: Manage Stale Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+    - name: Handle stale issues and PRs
+      uses: actions/stale@v8
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: |
+          This issue has been automatically marked as stale because it has not had 
+          recent activity. It will be closed if no further activity occurs. 
+          
+          If this issue is still relevant, please:
+          - Add more details or context
+          - Remove the stale label
+          - Comment to keep it active
+          
+          Thank you for your contributions!
+        stale-pr-message: |
+          This pull request has been automatically marked as stale because it has not had 
+          recent activity. It will be closed if no further activity occurs.
+          
+          If this PR is still relevant, please:
+          - Rebase with the latest master
+          - Address any review comments
+          - Remove the stale label
+          - Comment to keep it active
+        close-issue-message: |
+          This issue was automatically closed due to inactivity. 
+          If you believe this issue is still relevant, please reopen it and provide additional context.
+        close-pr-message: |
+          This pull request was automatically closed due to inactivity.
+          If you'd like to continue with this PR, please reopen it and rebase with the latest master.
+        days-before-stale: 30
+        days-before-close: 7
+        stale-issue-label: 'stale'
+        stale-pr-label: 'stale'
+        exempt-issue-labels: 'pinned,security,priority-high'
+        exempt-pr-labels: 'pinned,security,priority-high'
+
+  welcome-new-contributors:
+    name: Welcome New Contributors
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    
+    steps:
+    - name: Check if first-time contributor
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { data: collaborators } = await github.rest.repos.listCollaborators({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+          
+          const isCollaborator = collaborators.some(collaborator => 
+            collaborator.login === context.payload.pull_request.user.login
+          );
+          
+          if (!isCollaborator) {
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🎉 **Welcome to the Gmail AI Chat Agent project!**\n\nThank you for your contribution! This appears to be your first pull request to this repository.\n\nHere\'s what happens next:\n- ✅ Automated tests will run to validate your changes\n- 👀 A maintainer will review your code\n- 💬 We may ask questions or request changes\n- 🚀 Once approved, your changes will be merged\n\n**Before merging, please ensure:**\n- [ ] Tests pass (check the Actions tab)\n- [ ] Code follows project conventions\n- [ ] Documentation is updated if needed\n- [ ] No sensitive information is included\n\nThanks for making this project better! 🚀'
+            });
+            
+            await github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['first-time-contributor']
+            });
+          } 

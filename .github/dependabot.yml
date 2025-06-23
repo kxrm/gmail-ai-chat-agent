@@ -1,0 +1,80 @@
+version: 2
+updates:
+  # Composer (PHP dependencies)
+  - package-ecosystem: "composer"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kxrm"
+    assignees:
+      - "kxrm"
+    labels:
+      - "dependencies"
+      - "composer"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    # Group minor and patch updates together
+    groups:
+      php-dependencies:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "phpunit/phpunit"
+          - "infection/infection"
+        update-types:
+          - "minor"
+          - "patch"
+    # Auto-merge patch updates for trusted dependencies
+    auto-merge:
+      dependency-type: "production"
+      update-type: "security"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "10:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "kxrm"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(actions)"
+      include: "scope"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Docker (DevContainer base image)
+  - package-ecosystem: "docker"
+    directory: "/.devcontainer"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 2
+    reviewers:
+      - "kxrm"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "devcontainer"
+    commit-message:
+      prefix: "chore(docker)"
+      include: "scope" 

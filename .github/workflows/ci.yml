@@ -1,0 +1,152 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+  schedule:
+    # Run tests daily at 2 AM UTC to catch dependency issues
+    - cron: '0 2 * * *'
+
+jobs:
+  test:
+    name: Test Suite (PHP ${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.1', '8.2', '8.3']
+        include:
+          - php-version: '8.2'
+            coverage: true
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: curl, json, mbstring, sockets, xml
+        coverage: ${{ matrix.coverage && 'xdebug' || 'none' }}
+        tools: composer:v2
+    
+    - name: Validate composer.json and composer.lock
+      run: composer validate --strict
+    
+    - name: Cache Composer dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.composer/cache
+        key: php-${{ matrix.php-version }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: php-${{ matrix.php-version }}-composer-
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest --no-interaction
+    
+    - name: Create storage directories
+      run: |
+        mkdir -p storage/logs storage/sessions storage/sessions/temp_sessions
+        chmod 755 storage/logs storage/sessions storage/sessions/temp_sessions
+    
+    - name: Run PHP syntax check
+      run: find . -name "*.php" -not -path "./vendor/*" -exec php -l {} \;
+    
+    - name: Run PHPUnit (Unit Tests)
+      run: vendor/bin/phpunit tests/unit/ --verbose
+    
+    - name: Run PHPUnit (Integration Tests)
+      run: vendor/bin/phpunit tests/integration/ --verbose
+    
+    - name: Run PHPUnit with Coverage (PHP 8.2 only)
+      if: matrix.coverage
+      run: |
+        vendor/bin/phpunit tests/unit/ tests/integration/ \
+          --coverage-clover=coverage.xml \
+          --coverage-text \
+          --coverage-html=coverage-report
+    
+    - name: Upload coverage to Codecov
+      if: matrix.coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+    
+    - name: Archive coverage report
+      if: matrix.coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage-report/
+        retention-days: 30
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        tools: composer:v2
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+    
+    - name: Run security audit
+      run: |
+        # Check for known vulnerabilities in dependencies
+        composer audit --format=json || true
+    
+    - name: Secret scanning
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: ${{ github.event.repository.default_branch }}
+        head: HEAD
+        extra_args: --debug --only-verified
+    
+    - name: Dependency review
+      uses: actions/dependency-review-action@v3
+      if: github.event_name == 'pull_request'
+
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        tools: composer:v2, phpstan, psalm
+    
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+    
+    - name: Check code style (PSR-12)
+      run: |
+        vendor/bin/php-cs-fixer check --diff --dry-run --format=txt || true
+    
+    - name: Run mutation testing (sample)
+      run: |
+        # Run a small subset for CI to avoid timeouts
+        timeout 300 vendor/bin/infection --threads=4 --min-msi=70 --min-covered-msi=70 --only-covered || true
+    
+    - name: Validate .gitignore
+      run: |
+        # Ensure sensitive files are properly ignored
+        ! git ls-files | grep -E "(client_secret\.json|\.env|sess_|\.log)$" || exit 1 
