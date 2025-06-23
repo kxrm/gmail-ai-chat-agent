@@ -1,0 +1,21 @@
+parameters:
+    level: 6
+    paths:
+        - core
+        - services
+        - public
+        - tests
+    excludePaths:
+        - vendor
+        - storage
+        - coverage-report
+    ignoreErrors:
+        # Allow dynamic properties for legacy code
+        - '#Access to an undefined property#'
+        # Allow mixed types for Google API responses
+        - '#has no return type specified#'
+        # Ignore missing type hints in test files
+        - '#Method Tests\\.*::.* has no return type specified#'
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    treatPhpDocTypesAsCertain: false 

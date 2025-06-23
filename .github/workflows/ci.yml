@@ -45,7 +45,7 @@ jobs:
         restore-keys: php-${{ matrix.php-version }}-composer-
     
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest --no-interaction
+      run: composer install --prefer-dist --no-progress --no-interaction
     
     - name: Create storage directories
       run: |
@@ -132,21 +132,35 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.2'
-        tools: composer:v2, phpstan, psalm
+        tools: composer:v2
     
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
     
+    - name: Create storage directories (needed for some analysis)
+      run: |
+        mkdir -p storage/logs storage/sessions storage/sessions/temp_sessions
+        chmod 755 storage/logs storage/sessions storage/sessions/temp_sessions
+    
     - name: Check code style (PSR-12)
       run: |
-        vendor/bin/php-cs-fixer check --diff --dry-run --format=txt || true
+        composer cs:check || echo "Code style issues found (non-blocking in CI)"
+    
+    - name: Run static analysis
+      run: |
+        composer stan || echo "Static analysis issues found (non-blocking in CI)"
     
     - name: Run mutation testing (sample)
       run: |
         # Run a small subset for CI to avoid timeouts
-        timeout 300 vendor/bin/infection --threads=4 --min-msi=70 --min-covered-msi=70 --only-covered || true
+        timeout 300 composer test:mut || echo "Mutation testing completed with issues (non-blocking in CI)"
     
     - name: Validate .gitignore
       run: |
         # Ensure sensitive files are properly ignored
-        ! git ls-files | grep -E "(client_secret\.json|\.env|sess_|\.log)$" || exit 1 
+        if git ls-files | grep -E "(client_secret\.json|\.env|sess_|\.log)$"; then
+          echo "❌ Sensitive files found in repository!"
+          exit 1
+        else
+          echo "✅ No sensitive files found in repository"
+        fi 
