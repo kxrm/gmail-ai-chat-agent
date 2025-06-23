@@ -1,4 +1,7 @@
 {
+    "name": "kxrm/gmail-ai-chat-agent",
+    "description": "Gmail AI Chat Agent - A full-stack PHP application with Ollama integration that lets you chat with an AI assistant capable of managing Gmail and Google Contacts via natural language commands.",
+    "license": "MIT",
     "require": {
         "php": ">=8.1",
         "google/apiclient": "^2.12",
