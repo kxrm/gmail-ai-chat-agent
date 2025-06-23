@@ -1,0 +1,19 @@
+{
+    "build": { "dockerfile": "Dockerfile" },
+    "name": "PHP Environment",
+    "workspaceFolder": "/workspace",
+    "forwardPorts": [8000],
+    "postCreateCommand": "composer install",
+    "remoteUser": "vscode",
+    "cap_add": ["NET_RAW"],
+    "mounts": [ "source=.,target=/workspace,type=bind,consistency=cached" ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client",
+                "ms-vscode.vscode-typescript-next",
+                "felixfbecker.php-debug"
+            ]
+        }
+    }
+} 

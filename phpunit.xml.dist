@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="vendor/autoload.php"
+         colors="true"
+         stopOnFailure="false"
+         backupGlobals="false">
+
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>./tests/unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>./tests/integration</directory>
+        </testsuite>
+        <testsuite name="E2E">
+            <directory>./tests/e2e</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">core</directory>
+            <directory suffix=".php">services</directory>
+        </include>
+        <exclude>
+            <file>core/OllamaClient.php</file>
+            <file>core/GmailHelpers.php</file>
+            <file>core/GoogleServiceProvider.php</file>
+            <directory suffix=".php">commands</directory>
+            <directory suffix=".php">services</directory>
+        </exclude>
+    </coverage>
+</phpunit> 

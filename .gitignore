@@ -1,0 +1,180 @@
+# Gmail AI Chat Agent - .gitignore
+
+# ====================
+# PHP & Composer
+# ====================
+vendor/
+composer.phar
+composer.lock.backup
+
+# ====================
+# Configuration & Secrets  
+# ====================
+# Google OAuth credentials (contains client secrets)
+config/client_secret.json
+# Backup config files
+config/*.backup
+config/*.bak
+
+# ====================
+# Runtime & Storage
+# ====================
+# Session files (user sessions contain sensitive data)
+storage/sessions/sess_*
+!storage/sessions/.gitkeep
+# Temporary session files
+storage/sessions/temp_sessions/sess_*
+!storage/sessions/temp_sessions/
+!storage/sessions/temp_sessions/.gitkeep
+
+# Log files (may contain sensitive information)
+storage/logs/*
+!storage/logs/.gitkeep
+
+# Cache and temporary files
+storage/cache/
+storage/tmp/
+tmp/
+temp/
+
+# ====================
+# Testing & Coverage
+# ====================
+# Generated coverage reports
+coverage-report/
+build/
+# PHPUnit cache
+.phpunit.result.cache
+# Test output logs
+test-output.log
+tests/**/output/
+
+# Infection mutation testing
+infection.log
+
+# ====================
+# IDE & Editor Files
+# ====================
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PhpStorm/IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# ====================
+# Operating System
+# ====================
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Icon?
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+.directory
+.trash-*
+
+# ====================
+# Development Tools
+# ====================
+# Xdebug
+.xdebug/
+
+# Node.js (if any JS tools are added)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ====================
+# Project Specific
+# ====================
+# Local environment configuration
+.env
+.env.local
+.env.*.local
+
+# Backup files
+*.backup
+*.bak
+*.orig
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+
+# Generated documentation
+docs/build/
+docs/_build/
+
+# ====================
+# Docker (if used)
+# ====================
+# Docker override files
+docker-compose.override.yml
+.dockerignore.backup
+
+# ====================
+# Security
+# ====================
+# Private keys
+*.pem
+*.key
+*.p12
+*.pfx
+
+# JWT secrets
+jwt.secret
+*.jwt
+
+# Database files (if SQLite is ever used)
+*.sqlite
+*.sqlite3
+*.db
+
+# ====================
+# Miscellaneous
+# ====================
+# Package managers
+.pnpm-store/
+.yarn/
+
+# Runtime logs
+*.log
+!*.log.example 

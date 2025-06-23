@@ -1,0 +1,10 @@
+{
+  "source": {
+    "directories": ["core", "services"]
+  },
+  "mutators": {
+    "@default": true
+  },
+  "minMsi": 70,
+  "minCoveredMsi": 70
+} 

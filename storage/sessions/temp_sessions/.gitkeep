@@ -1,0 +1,2 @@
+# This file ensures the temp_sessions directory is preserved in git
+# Temporary session files are ignored but the directory structure is needed for the application to work 
