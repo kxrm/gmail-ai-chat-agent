@@ -1,19 +1,47 @@
 {
     "build": { "dockerfile": "Dockerfile" },
-    "name": "PHP Environment",
+    "name": "Gmail AI Chat Agent - PHP Environment",
     "workspaceFolder": "/workspace",
     "forwardPorts": [8000],
     "postCreateCommand": "composer install",
     "remoteUser": "vscode",
     "cap_add": ["NET_RAW"],
-    "mounts": [ "source=.,target=/workspace,type=bind,consistency=cached" ],
+    "mounts": [ 
+        "source=.,target=/workspace,type=bind,consistency=cached"
+    ],
+    "features": {
+        "ghcr.io/devcontainers/features/github-cli:1": {
+            "installDirectlyFromGitHubRelease": true
+        }
+    },
     "customizations": {
         "vscode": {
             "extensions": [
                 "bmewburn.vscode-intelephense-client",
                 "ms-vscode.vscode-typescript-next",
-                "felixfbecker.php-debug"
-            ]
+                "felixfbecker.php-debug",
+                "GitHub.vscode-pull-request-github",
+                "GitHub.github-vscode-theme",
+                "GitHub.copilot",
+                "GitHub.copilot-chat",
+                "eamodio.gitlens"
+            ],
+            "settings": {
+                "git.enableSmartCommit": true,
+                "git.confirmSync": false,
+                "github.copilot.enable": {
+                    "*": true,
+                    "yaml": false,
+                    "plaintext": false,
+                    "markdown": true
+                }
+            }
         }
+    },
+    "containerEnv": {
+        "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}"
+    },
+    "remoteEnv": {
+        "GITHUB_TOKEN": "${localEnv:GITHUB_TOKEN}"
     }
 } 
