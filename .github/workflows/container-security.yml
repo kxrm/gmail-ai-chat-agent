@@ -51,7 +51,7 @@ jobs:
         severity: 'CRITICAL,HIGH'
     
     - name: Additional security scan with Grype
-      uses: anchore/scan-action@v3
+      uses: anchore/scan-action@v4
       if: always()
       with:
         image: 'gmail-ai-chat-agent:dev'

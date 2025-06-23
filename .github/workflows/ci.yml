@@ -1,4 +1,6 @@
 name: CI/CD Pipeline
+# Comprehensive testing pipeline with multi-PHP matrix testing, security scans, and code quality analysis
+# This is the main workflow that validates all code changes and ensures project health
 
 on:
   push:
@@ -11,6 +13,8 @@ on:
 
 jobs:
   test:
+    # Main test suite with matrix testing across PHP versions
+    # Runs unit tests, integration tests, and generates coverage reports
     name: Test Suite (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
     
@@ -86,6 +90,8 @@ jobs:
         retention-days: 30
 
   security:
+    # Security validation: dependency audit, secret scanning, and vulnerability checks
+    # Runs independently of main test suite for comprehensive security coverage
     name: Security Scan
     runs-on: ubuntu-latest
     
@@ -122,6 +128,8 @@ jobs:
       if: github.event_name == 'pull_request'
 
   code-quality:
+    # Code quality validation: PSR-12 style, PHPStan analysis, mutation testing
+    # All checks are non-blocking to prevent workflow failures on style issues
     name: Code Quality Analysis
     runs-on: ubuntu-latest
     
