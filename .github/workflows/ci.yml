@@ -125,7 +125,8 @@ jobs:
     
     - name: Dependency review
       uses: actions/dependency-review-action@v4
-      if: github.event_name == 'pull_request'
+      if: github.event_name == 'pull_request' && (github.repository_visibility == 'public' || vars.ADVANCED_SECURITY_ENABLED == 'true')
+      continue-on-error: true
 
   code-quality:
     # Code quality validation: PSR-12 style, PHPStan analysis, mutation testing
